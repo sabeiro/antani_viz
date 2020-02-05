@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta charset="utf-8">
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/simple-sidebar.css" rel="stylesheet">
+	<title>optEn - viz inspect</title>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/nanobar/0.2.1/nanobar.min.js"></script>
+	<!-- <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script> -->
+	<script src="vendor/jquery/jquery.min.js"></script>
+	<!-- <script src="https://unpkg.com/d3@5.9.2/dist/d3.js"></script> -->
+	<script src="https://d3js.org/d3.v4.js"></script>
+	<script src="https://openlayers.org/en/v5.3.0/build/ol.js"></script>
+	<script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+	<script src="https://unpkg.com/ol-layerswitcher@3.4.0"></script>
+	<link rel="stylesheet" href="https://unpkg.com/ol-layerswitcher@3.4.0/src/ol-layerswitcher.css" />
+	<link rel="stylesheet" type="text/css" href="map_style.css">
+    </head>
+    <body>
+	<div class="d-flex" id="wrapper">
+	    <!-- Sidebar -->
+	    <div class="bg-light border-right" id="sidebar-wrapper">
+		<div class="sidebar-heading"><img src="fig/antani_logo2.svg"/> </div>
+		<div class="list-group list-group-flush">
+		    <a href="#" class="list-group-item list-group-item-action bg-light">move</a>
+		    <a href="#" class="list-group-item list-group-item-action bg-light">stop</a>
+		    <a href="#" class="list-group-item list-group-item-action bg-light">q_table</a>
+		    <form>
+			<label>phantom</label> &nbsp; <input id="phantom_id" type="number" step="1" style="width:2rem" value="4"><br>
+			<label>init</label> &nbsp; <input id="init_id" type="checkbox" name="vehicle1" value="true"><br>
+			<label>cluster</label> &nbsp; <input id="cluster_id" type="checkbox" name="vehicle1" value="true"><br>
+			<label>outset</label> &nbsp; <input id="outset_id" type="checkbox" name="vehicle1" value="true"><br>
+		    </form>
+		    
+		</div>
+	    </div>
+	    <!-- /#sidebar-wrapper -->
+	    <!-- Page Content -->
+	    <div id="page-content-wrapper">
+		<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+		    <button class="btn btn-light" id="menu-toggle">< conf</button>
+		    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		    </button>
+		    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+			    <li class="nav-item active">
+				<a class="nav-link" href="#">home <span class="sr-only">(current)</span></a>
+			    </li>
+			    <li class="nav-item">
+				<a class="nav-link" href="https://gitlab.com/goflash1/data/antani/tree/master">repo</a>
+			    </li>
+			    <li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    documentation
+				</a>
+				<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+				    <a class="dropdown-item" href="http://10.0.49.178/antani_demo.mp4">video</a>
+				    <a class="dropdown-item" href="../docs/antani_infra.html">infra</a>
+				    <a class="dropdown-item" href="../docs/antani_kpi.html">kpi</a>
+				    <a class="dropdown-item" href="../docs/antani_integration.html">integration</a>
+				    <div class="dropdown-divider"></div>
+				    <a class="dropdown-item" href="../docs/mallink_engine.html">engine</a>
+				    <a class="dropdown-item" href="../docs/geomadi_graph.html">graph</a>
+				</div>
+			    </li>
+			</ul>
+		    </div>
+		</nav>
+		<div class="container-fluid">
+		    <div id="map" class="map"></div>
+		    <div id="popup" class="ol-popup">
+			<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+			<div id="popup-content"></div>
+		    </div>
+		    <form>
+			<!-- <label>distance</label>
+			     <input id="distance" type="range" min="0" max="100" step="1" value="40"/> -->
+			<input id="endpoint_id" type="text" style="width:100pt" value="localhost:5000">
+			<input id="publish" type="button" value="publish" onclick="publish_solution();">
+			<!-- <label>load &nbsp;</label> -->
+			<select id="sol_file" class="form-control">
+			    <option value="sol_grandC" selected>granC</option>
+			    <option value="sol_cluster">cluster</option>
+			    <option value="sol_latest">latest</option>
+			    <option value="sol_canonical">canonical</option>
+			    <option value="sol_phantom">phantom</option>
+			    <option value="sol_routific">routific</option>
+			    <option value="sol_routific_small">routific2</option>
+			    <option value="sol_routificOpt" >routificOpt</option>
+			    <option value="sol_blank">blank</option>
+			    <option value="sol_lowLength">lowLength</option>
+			    <option value="sol_routed">routed</option>
+			    <option value="sol_winter">winter</option>
+			    <option value="sol_winter">frontend</option>
+			</select>
+			<input id="graph" type="button" value="graph" onclick="loadGraph();">
+			<label>agent</label> <input id="agent_id" type="text" style="width:2rem" value="">
+			<label>@</label> <input id="spot_id" type="text" style="width:100pt" value="">
+			<input id="refresh_but" type="button" value="simplify" onclick="simplifySolution();">
+			<input id="cluster_but" type="button" value="cluster" onclick="clusterSpot();">
+			<input id="outset_but" type="button" value="outset" onclick="outsetSpot();">
+			<input id="init_but" type="button" value="init" onclick="initPath();">
+			<input id="step_but" type="button" value="step" onclick="singleStep();">
+			<span id="solution"></span>
+			<span id="status"></span>
+		    </form>
+		    <input id="conf" type="button" value="conf" onclick="updateConf();">
+		    <input id="erase" type="button" value="erase" onclick="eraseSol();">
+		    <button id="start-bg-job">process</button>
+		    <button id="kill-bg-job">kill</button>
+		    <button id="load_status">load</button>
+		    <button id="test_func">test</button>
+		    <input id="job_id" alt="job_id" type="text" style="width:100pt" value="d75812b4-e361-4c54-98c8-531c108ba23b">
+		    <button ><a href = "#" id = "save-bg-job" download="job_frontend.json">download</a></button>
+		    <input type="file" id="load-bg-job" />
+		    <div id="agent_info"> </div>
+		    <!-- <button id="save-bg-job">save</button> -->
+		    <!-- <input id="save_id" type="text" style="width:100pt" value="job_frontend.json"> -->
+		    <div id="progress"><div class="progress_bar"><div></div><div>idle 0%</div></div><hr></div>
+		    
+		    <div class="d3_graph" id="completion_bar"></div>
+		    <div class="d3_graph" id="duration_bar"></div>
+		    <div class="d3_graph" id="energy_bar"></div>
+		    <div class="d3_graph" id="score_bar"></div>
+		</div><!-- container-fluid -->
+		<!-- Sidebar -->
+		<div class="bg-light border-left" id="sidebar-wrapper-right">
+		    <div class="sidebar-heading"><img src="fig/van.svg"/> </div>
+		    <div class="list-group list-group-flush">
+			<a href="#" class="list-group-item list-group-item-action bg-light">driver</a>
+		    </div>
+		</div>
+		<!-- /#sidebar-wrapper -->
+
+	    </div>
+	    <!-- /#wrapper -->
+	    <script src="etl.js"></script>
+	    <script src="map.js"></script>
+	    <script src="d3_chart.js"></script>
+	    <script src="interaction.js"></script>
+	    <script src="communication.js"></script>
+	    <script src="testing.js"></script>
+	    <!-- Bootstrap core JavaScript -->
+	    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+	    <!-- Menu Toggle Script -->
+	    <script>
+	     $("#menu-toggle").click(function(e) {
+		 e.preventDefault();
+		 $("#wrapper").toggleClass("toggled");
+		 if($("#menu-toggle").text().charAt(0) == "<"){
+		     $("#menu-toggle").text("> conf");
+		 }else{
+		     $("#menu-toggle").text("< conf");
+		 }
+	     });
+	    </script>
+	    
+    </body>
+</html>
